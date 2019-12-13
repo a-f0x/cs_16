@@ -129,10 +129,12 @@ func initNotificator(config *TelegramConfig) {
 }
 
 func getFullServerInfo() (string, error) {
+
 	return rcon.SendRconCommand("status")
 }
 
 func initLogReceiver(port int64) {
+
 	logReceiver := NewLogReceiver(port)
 	go func() {
 		for {
@@ -144,5 +146,4 @@ func initLogReceiver(port int64) {
 	}()
 
 	logReceiver.Start()
-
 }

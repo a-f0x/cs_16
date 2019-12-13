@@ -13,22 +13,23 @@ import (
 )
 
 type TelegramNotificator struct {
-	config *TelegramConfig
-	bot    *tgbotapi.BotAPI
-	chats  []*Chat
-	//admins   []Chat
+	config   *TelegramConfig
+	bot      *tgbotapi.BotAPI
+	chats    []*Chat
 	selfName string
 	BotEvent chan BotEvent
 }
 
 func NewTelegramNotificator(config *TelegramConfig) *TelegramNotificator {
-	notificator := &TelegramNotificator{}
-	notificator.config = config
-	notificator.BotEvent = make(chan BotEvent)
-	return notificator
+
+	return &TelegramNotificator{
+		config:   config,
+		BotEvent: make(chan BotEvent),
+	}
 }
 
 func (n *TelegramNotificator) NotifyAll(message string) {
+
 	for _, group := range n.chats {
 		if !group.Muted {
 			n.Notify(message, group.Id)
@@ -41,6 +42,7 @@ func (n *TelegramNotificator) Notify(message string, chatId int64) {
 }
 
 func (n *TelegramNotificator) tryConnect() *tgbotapi.BotAPI {
+
 	log.Println("Trying to connect telegram bot api...")
 	b, err := tgbotapi.NewBotAPIWithClient(n.config.Bot.Token, &http.Client{})
 	if err != nil {
@@ -48,10 +50,12 @@ func (n *TelegramNotificator) tryConnect() *tgbotapi.BotAPI {
 		time.Sleep(time.Duration(n.config.Bot.ReconnectTimeout) * time.Second)
 		return n.tryConnect()
 	}
+
 	return b
 }
 
 func (n *TelegramNotificator) Start() {
+
 	configureProxy(n.config.Proxy)
 	n.initChats()
 	n.bot = n.tryConnect()
@@ -74,10 +78,10 @@ func (n *TelegramNotificator) Start() {
 			n.processUpdate(update)
 		}
 	}
-
 }
 
 func (n *TelegramNotificator) processUpdate(update tgbotapi.Update) {
+
 	chatId := update.Message.Chat.ID
 	groupName := update.Message.Chat.Title
 	userName := update.Message.From.UserName
@@ -88,19 +92,22 @@ func (n *TelegramNotificator) processUpdate(update tgbotapi.Update) {
 		return
 	}
 	n.processGroupMessage(chatId, groupName, text)
-
 }
 
 func (n *TelegramNotificator) processDirectMessage(chatId int64, userName string, text string) {
+
 	if !n.isChatExist(chatId) {
 		n.addChat(userName, chatId, false, false)
 		n.onAction(chatId, "", ChatAdded)
 		return
 	}
+
 	if n.processBotCommands(text, chatId) {
 		return
 	}
+
 	chat := n.getChat(chatId)
+
 	if n.getChat(chatId).AllowExecuteRcon {
 		n.onAction(chatId, text, RconCommand)
 		return
@@ -110,6 +117,7 @@ func (n *TelegramNotificator) processDirectMessage(chatId int64, userName string
 		n.sendMessage("Please enter the password", chatId)
 		return
 	}
+
 	chat.AllowExecuteRcon = true
 	n.serializeChats()
 	n.sendMessage("You are added as the administrator. Write me a command and I will execute it on the server.\n"+
@@ -134,6 +142,7 @@ func (n *TelegramNotificator) processGroupMessage(chatId int64, groupName string
 }
 
 func (n *TelegramNotificator) processBotCommands(command string, chatId int64) bool {
+
 	if command == "/mute" {
 		n.muteChat(chatId, true)
 		n.sendMessage("Chat muted", chatId)
@@ -150,10 +159,12 @@ func (n *TelegramNotificator) processBotCommands(command string, chatId int64) b
 		n.onAction(chatId, command, BotCommand)
 		return true
 	}
+
 	return false
 }
 
 func (n *TelegramNotificator) muteChat(chatId int64, mute bool) {
+
 	chat := n.getChat(chatId)
 	if chat == nil {
 		return
@@ -163,6 +174,7 @@ func (n *TelegramNotificator) muteChat(chatId int64, mute bool) {
 }
 
 func (n *TelegramNotificator) onAction(chatId int64, message string, action BotAction) {
+
 	n.BotEvent <- BotEvent{
 		ChatId:    chatId,
 		BotAction: action,
@@ -171,6 +183,7 @@ func (n *TelegramNotificator) onAction(chatId int64, message string, action BotA
 }
 
 func configureProxy(proxyConfig TelegramProxyConfig) {
+
 	if !proxyConfig.Enabled {
 		return
 	}
@@ -179,7 +192,6 @@ func configureProxy(proxyConfig TelegramProxyConfig) {
 		proxyConfig.Password,
 		proxyConfig.Host,
 		proxyConfig.Port)
-
 	err := os.Setenv("HTTP_PROXY", proxyUrl)
 	if err != nil {
 		panic(fmt.Errorf("Fatal error set os enb HTTP_PROXY: %s \n", err))
@@ -187,6 +199,7 @@ func configureProxy(proxyConfig TelegramProxyConfig) {
 }
 
 func (n *TelegramNotificator) sendMessage(message string, chatId int64) {
+
 	msg := tgbotapi.NewMessage(chatId, message)
 	_, e := n.bot.Send(msg)
 	if e != nil {
@@ -202,6 +215,7 @@ func (n *TelegramNotificator) sendMessage(message string, chatId int64) {
 }
 
 func (n *TelegramNotificator) initChats() {
+
 	n.chats = make([]*Chat, 0)
 	file, readError := ioutil.ReadFile("chats.json")
 	if readError == nil {
@@ -210,10 +224,11 @@ func (n *TelegramNotificator) initChats() {
 }
 
 func (n *TelegramNotificator) addChat(chatName string, chatId int64, muted bool, allowRcon bool) {
+
 	n.chats = append(n.chats, &Chat{chatName, chatId, muted, allowRcon})
 	n.serializeChats()
-
 }
+
 func (n *TelegramNotificator) removeChat(chatId int64) {
 
 	if !n.isChatExist(chatId) {
@@ -221,6 +236,7 @@ func (n *TelegramNotificator) removeChat(chatId int64) {
 	}
 
 	chats := make([]*Chat, 0)
+
 	for _, chat := range n.chats {
 		if chat.Id == chatId {
 			continue
@@ -229,15 +245,16 @@ func (n *TelegramNotificator) removeChat(chatId int64) {
 	}
 	n.chats = chats
 	n.serializeChats()
-
 }
 
 func (n *TelegramNotificator) getChat(chatId int64) *Chat {
+
 	for _, chat := range n.chats {
 		if chat.Id == chatId {
 			return chat
 		}
 	}
+
 	return nil
 }
 
@@ -246,6 +263,7 @@ func (n *TelegramNotificator) isChatExist(chatId int64) bool {
 }
 
 func (n *TelegramNotificator) serializeChats() {
+
 	file, _ := json.MarshalIndent(n.chats, "", " ")
 	_ = ioutil.WriteFile("chat_groups.json", file, 0644)
 }

@@ -8,17 +8,23 @@ import (
 )
 
 type Rcon struct {
-	/*IP Address of HLDS server*/
 	hldsServerAddress string
-	/*Remote console password for HLDS server*/
-	password []byte
+	password          []byte
 }
 
+var (
+	challenge = []byte("challenge rcon\n")
+	prefix    = []byte("rcon")
+	header    = []byte{0xFF, 0xFF, 0xFF, 0xFF}
+	delimiter = []byte{32}
+)
+
 func NewRcon(hldsServerAddress string, hldsServerPort int64, hldsPassword string) *Rcon {
-	rcon := &Rcon{}
-	rcon.hldsServerAddress = fmt.Sprintf("%s:%d", hldsServerAddress, hldsServerPort)
-	rcon.password = []byte(hldsPassword)
-	return rcon
+
+	return &Rcon{
+		hldsServerAddress: fmt.Sprintf("%s:%d", hldsServerAddress, hldsServerPort),
+		password:          []byte(hldsPassword),
+	}
 }
 
 func (client *Rcon) SendRconCommand(command string) (string, error) {
@@ -31,16 +37,9 @@ func (client *Rcon) SendRconCommand(command string) (string, error) {
 	if len(result) <= 2 {
 		return "Wrong rcon command", nil
 	}
+
 	return result, nil
-
 }
-
-var (
-	challenge = []byte("challenge rcon\n")
-	prefix    = []byte("rcon")
-	header    = []byte{0xFF, 0xFF, 0xFF, 0xFF}
-	delimiter = []byte{32}
-)
 
 func (client *Rcon) send(data []byte) ([]byte, error) {
 
@@ -66,10 +65,10 @@ func (client *Rcon) send(data []byte) ([]byte, error) {
 	buf.Write(data)
 
 	return write(connection, buf.Bytes())
-
 }
 
 func (client *Rcon) openConnection() (*net.UDPConn, error) {
+
 	server, err := net.ResolveUDPAddr("udp4", client.hldsServerAddress)
 	if err != nil {
 		return nil, err
@@ -80,11 +79,12 @@ func (client *Rcon) openConnection() (*net.UDPConn, error) {
 	}
 	deadline := time.Now().Add(time.Duration(1) * time.Second)
 	connection.SetDeadline(deadline)
-	return connection, nil
 
+	return connection, nil
 }
 
 func commandId(connection *net.UDPConn) ([]byte, error) {
+
 	response, err := write(connection, challenge)
 	if err != nil {
 		return nil, err
@@ -97,7 +97,6 @@ func commandId(connection *net.UDPConn) ([]byte, error) {
 func write(connection *net.UDPConn, data []byte) ([]byte, error) {
 
 	buf := new(bytes.Buffer)
-
 	buf.Write(header)
 	buf.Write(data)
 
@@ -105,12 +104,13 @@ func write(connection *net.UDPConn, data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	buffer := make([]byte, 2048)
 
 	n, _, err := connection.ReadFrom(buffer)
-
 	if err != nil {
 		return nil, err
 	}
+
 	return buffer[0 : n-1], nil
 }

@@ -14,6 +14,7 @@ type LogReceiver struct {
 }
 
 func NewLogReceiver(port int64) LogReceiver {
+
 	return LogReceiver{
 		port:      port,
 		GameEvent: make(chan GameEvent),
@@ -21,16 +22,14 @@ func NewLogReceiver(port int64) LogReceiver {
 }
 
 func (l *LogReceiver) Start() {
-	udpServer, err := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s%d", ":", l.port))
 
+	udpServer, err := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s%d", ":", l.port))
 	if err != nil {
 		log.Fatalf("Error start udp server for listen event from cs server: %s \n", err)
 	}
 
 	connection, err := net.ListenUDP("udp4", udpServer)
-
 	defer connection.Close()
-
 	if err != nil {
 		log.Fatalf("Error start udp server for listet event from cs server: %s \n", err)
 	}
@@ -48,11 +47,13 @@ func (l *LogReceiver) Start() {
 }
 
 func (l *LogReceiver) parseLogEvent(event []byte) {
+
 	if len(event) < 24 {
 		return
 	}
-	//log.Println(string(event))
+
 	str := string(event[23:])
+
 	if strings.Contains(str, " entered the game") {
 		l.GameEvent <- GameEvent{
 			TimeStamp:    time.Now(),
@@ -72,7 +73,8 @@ func (l *LogReceiver) parseLogEvent(event []byte) {
 }
 
 func findNick(eventString string) string {
-	index := strings.Index(eventString, "<")
-	return eventString[:index]
 
+	index := strings.Index(eventString, "<")
+
+	return eventString[:index]
 }
