@@ -1,0 +1,41 @@
+version: '2'
+services:
+
+  cs:
+    container_name: cs
+    build:
+      context: ./csserver
+      args:
+        RCON_PASSWORD: ${RCON_PASSWORD}
+    expose:
+      - "${CS_SERVER_INTERNAL_PORT}/udp"
+      - "${CS_SERVER_INTERNAL_PORT}/tcp"
+    ports:
+      - "${CS_SERVER_EXTERNAL_PORT}:${CS_SERVER_INTERNAL_PORT}/udp"
+      - "${CS_SERVER_EXTERNAL_PORT}:${CS_SERVER_INTERNAL_PORT}/tcp"
+    environment:
+      - log_receiver_ip=bot
+      - log_receiver_port=${LOG_RECEIVER_PORT}
+      - rcon_password=${RCON_PASSWORD}
+      - cs_ip=cs
+      - cs_port=${CS_SERVER_INTERNAL_PORT}
+
+  bot:
+    container_name: bot
+    build:
+      context: .
+    expose:
+      - "${LOG_RECEIVER_PORT}/udp"
+    environment:
+      - cs_ip=cs
+      - cs_port=${CS_SERVER_INTERNAL_PORT}
+      - log_receiver_port=${LOG_RECEIVER_PORT}
+      - rcon_password=${RCON_PASSWORD}
+      - proxy_enabled=${PROXY_ENABLED}
+      - proxy_host=${PROXY_HOST}
+      - proxy_port=${PROXY_PORT}
+      - proxy_user=${PROXY_USER}
+      - proxy_password=${PROXY_PASSWORD}
+      - bot_token=${BOT_TOKEN}
+      - bot_reconnect_timeout=${BOT_RECONNECT_TIMEOUT_SEC}
+      - admin_password=${ADMIN_PASSWORD}
