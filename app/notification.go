@@ -87,7 +87,7 @@ func (n *TelegramNotificator) processUpdate(update tgbotapi.Update) {
 	userName := update.Message.From.UserName
 	text := update.Message.Text
 
-	if update.Message.Chat.Type != "group" {
+	if update.Message.Chat.Type != "group" && update.Message.Chat.Type != "supergroup" {
 		n.processDirectMessage(chatId, userName, text)
 		return
 	}
@@ -143,20 +143,42 @@ func (n *TelegramNotificator) processGroupMessage(chatId int64, groupName string
 
 func (n *TelegramNotificator) processBotCommands(command string, chatId int64) bool {
 
-	if command == "/mute" {
-		n.muteChat(chatId, true)
-		n.sendMessage("Chat muted", chatId)
-		return true
+	switch command {
+
+	case "/mute":
+		{
+			n.muteChat(chatId, true)
+			n.sendMessage("Chat muted", chatId)
+			return true
+		}
+	case "/unmute":
+		{
+			n.muteChat(chatId, false)
+			n.sendMessage("Chat unmuted", chatId)
+			return true
+		}
+
+	case "/info":
+		{
+			n.onAction(chatId, "status", RconCommand)
+			return true
+
+		}
+	case "/maps":
+		{
+			n.onAction(chatId, "maps *", RconCommand)
+			return true
+		}
 	}
 
-	if command == "/unmute" {
-		n.muteChat(chatId, false)
-		n.sendMessage("Chat unmuted", chatId)
-		return true
-	}
+	if strings.HasPrefix(command, "/vote_map") {
+		maps := strings.Fields(command)
+		if len(maps) < 2 {
+			notificator.Notify("The number of maps must be greater that zero", chatId)
+			return true
 
-	if command == "/info" {
-		n.onAction(chatId, command, BotCommand)
+		}
+		n.onAction(chatId, strings.Join(append([]string{"amx_votemap"}[:], maps[1:]...), " "), RconCommand)
 		return true
 	}
 

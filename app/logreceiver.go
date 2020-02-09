@@ -76,5 +76,5 @@ func findNick(eventString string) string {
 
 	index := strings.Index(eventString, "<")
 
-	return eventString[:index]
+	return eventString[1:index]
 }

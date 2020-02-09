@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 var (
@@ -96,20 +97,8 @@ func initNotificator(config *TelegramConfig) {
 				switch action := event.BotAction; action {
 				case ChatAdded:
 					notificator.Notify("Chat added", event.ChatId)
-					//i, err := getFullServerInfo()
-					//if err != nil {
-					//	notificator.Notify("Error get server info:"+err.Error(), event.ChatId)
-					//} else {
-					//	notificator.Notify(i, event.ChatId)
-					//}
-
 				case BotCommand:
-					result, err := getFullServerInfo()
-					if err != nil {
-						notificator.Notify(err.Error(), event.ChatId)
-					} else {
-						notificator.Notify(result, event.ChatId)
-					}
+					processBotCommand(&event)
 				case RconCommand:
 					result, err := rcon.SendRconCommand(event.Message)
 					if err != nil {
@@ -128,9 +117,31 @@ func initNotificator(config *TelegramConfig) {
 	}()
 }
 
-func getFullServerInfo() (string, error) {
+func processBotCommand(event *BotEvent) {
+	chatId := event.ChatId
+	message := event.Message
+	switch message {
+	case "/info":
+		{
+			result, err := rcon.SendRconCommand("status")
+			if err != nil {
+				notificator.Notify(err.Error(), chatId)
+			} else {
+				notificator.Notify(result, chatId)
+			}
+		}
 
-	return rcon.SendRconCommand("status")
+	case "/maps":
+		result, err := rcon.SendRconCommand("maps *")
+		if err != nil {
+			notificator.Notify(err.Error(), chatId)
+		} else {
+			notificator.Notify(result, chatId)
+		}
+	}
+
+	if strings.HasPrefix(message, "/amx_votemap ") {
+	}
 }
 
 func initLogReceiver(port int64) {
