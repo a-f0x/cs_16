@@ -102,7 +102,8 @@ func (n *TelegramNotificator) processDirectMessage(chatId int64, userName string
 		return
 	}
 
-	if n.processBotCommands(text, chatId) {
+	args := strings.Split(text, " ")
+	if n.processBotCommands(strings.Join(args[:1], ""), args[1:], chatId) {
 		return
 	}
 
@@ -136,12 +137,13 @@ func (n *TelegramNotificator) processGroupMessage(chatId int64, groupName string
 		return
 	}
 
-	index := strings.Index(text, "@")
-	message := text[:index]
-	n.processBotCommands(message, chatId)
+	//index := strings.Index(text, "@")
+	//botCommand := text[:index]
+	args := strings.Split(text, "@"+n.selfName)
+	n.processBotCommands(strings.Join(args[:1], ""), strings.Fields(strings.Join(args[1:], " ")), chatId)
 }
 
-func (n *TelegramNotificator) processBotCommands(command string, chatId int64) bool {
+func (n *TelegramNotificator) processBotCommands(command string, args []string, chatId int64) bool {
 
 	switch command {
 
@@ -172,13 +174,14 @@ func (n *TelegramNotificator) processBotCommands(command string, chatId int64) b
 	}
 
 	if strings.HasPrefix(command, "/vote_map") {
-		maps := strings.Fields(command)
-		if len(maps) < 2 {
+		if len(args) < 2 {
 			notificator.Notify("The number of maps must be greater that zero", chatId)
 			return true
 
 		}
-		n.onAction(chatId, strings.Join(append([]string{"amx_votemap"}[:], maps[1:]...), " "), RconCommand)
+		cmd := strings.Join(append([]string{"amx_votemap"}[:], args[:]...), " ")
+
+		n.onAction(chatId, cmd, RconCommand)
 		return true
 	}
 
