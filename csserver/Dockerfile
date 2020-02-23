@@ -9,4 +9,4 @@ COPY ./cstrike/server.cfg /opt/cs16-server/cstrike/server.cfg
 RUN echo rcon_password ${RCON_PASSWORD} >> /opt/cs16-server/cstrike/server.cfg
 WORKDIR /opt/cs16-server
 
-ENTRYPOINT exec ./hlds_run -game cstrike +ip ${cs_ip} +port ${cs_port} +maxplayers 32 +map de_dust2 +logaddress ${log_receiver_ip} ${log_receiver_port}
+ENTRYPOINT exec ./hlds_run -game cstrike +ip ${cs_ip} +port ${cs_port} +maxplayers 32 +map cs_16fighter +logaddress ${log_receiver_ip} ${log_receiver_port}
