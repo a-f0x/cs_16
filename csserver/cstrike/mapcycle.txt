@@ -20,3 +20,6 @@ $2000$
 fy_iceworld16
 fy_snow
 awp_india
+fy_poolday
+cs_16fighter
+fy_poolparty
