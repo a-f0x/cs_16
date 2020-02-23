@@ -1,3 +1,8 @@
+A mode of game in master branch is classsic
+A mode of game in branch csdm is death match
+
+
+
 1. Go to BotFather in Telegram and create the bot
 2. Set to your bot three commands:
     

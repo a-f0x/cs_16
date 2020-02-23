@@ -1,4 +1,4 @@
-FROM af0x/cs_server:v1
+FROM af0x/cs_server:classic
 MAINTAINER Andrey Dzhigirey <af0xdev@gmail.com>
 ARG RCON_PASSWORD
 
