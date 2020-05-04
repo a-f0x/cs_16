@@ -44,7 +44,7 @@ func (n *TelegramNotificator) Notify(message string, chatId int64) {
 func (n *TelegramNotificator) tryConnect() *tgbotapi.BotAPI {
 
 	log.Println("Trying to connect telegram bot api...")
-	b, err := tgbotapi.NewBotAPIWithClient(n.config.Bot.Token, &http.Client{})
+	b, err := tgbotapi.NewBotAPIWithClient(n.config.Bot.Token, tgbotapi.APIEndpoint, &http.Client{})
 	if err != nil {
 		log.Printf("Error connect to  telegram bot api: %s\nTry reconnect after %d sec...", err, n.config.Bot.ReconnectTimeout)
 		time.Sleep(time.Duration(n.config.Bot.ReconnectTimeout) * time.Second)
