@@ -25,10 +25,10 @@ var (
 
 func main() {
 
-	csIp = os.Getenv("cs_ip")
+	csIp = os.Getenv("hlds_ip")
 	var err error = nil
 
-	csPort, err = strconv.ParseInt(os.Getenv("cs_port"), 10, 64)
+	csPort, err = strconv.ParseInt(os.Getenv("hlds_port"), 10, 64)
 	if err != nil {
 		panic(fmt.Errorf("cs_port %s not valid \n", os.Getenv("cs_port")))
 	}

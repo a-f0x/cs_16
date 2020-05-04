@@ -8,17 +8,17 @@ services:
       args:
         RCON_PASSWORD: ${RCON_PASSWORD}
     expose:
-      - "${CS_SERVER_INTERNAL_PORT}/udp"
-      - "${CS_SERVER_INTERNAL_PORT}/tcp"
+      - "${HLDS_SERVER_INTERNAL_PORT}/udp"
+      - "${HLDS_SERVER_INTERNAL_PORT}/tcp"
     ports:
-      - "${CS_SERVER_EXTERNAL_PORT}:${CS_SERVER_INTERNAL_PORT}/udp"
-      - "${CS_SERVER_EXTERNAL_PORT}:${CS_SERVER_INTERNAL_PORT}/tcp"
+      - "${HLDS_SERVER_EXTERNAL_PORT}:${HLDS_SERVER_INTERNAL_PORT}/udp"
+      - "${HLDS_SERVER_EXTERNAL_PORT}:${HLDS_SERVER_INTERNAL_PORT}/tcp"
     environment:
       - log_receiver_ip=bot
       - log_receiver_port=${LOG_RECEIVER_PORT}
       - rcon_password=${RCON_PASSWORD}
       - cs_ip=cs
-      - cs_port=${CS_SERVER_INTERNAL_PORT}
+      - cs_port=${HLDS_SERVER_INTERNAL_PORT}
 
   bot:
     container_name: bot
@@ -27,8 +27,8 @@ services:
     expose:
       - "${LOG_RECEIVER_PORT}/udp"
     environment:
-      - cs_ip=cs
-      - cs_port=${CS_SERVER_INTERNAL_PORT}
+      - hlds_ip=cs
+      - hlds_port=${HLDS_SERVER_INTERNAL_PORT}
       - log_receiver_port=${LOG_RECEIVER_PORT}
       - rcon_password=${RCON_PASSWORD}
       - proxy_enabled=${PROXY_ENABLED}
