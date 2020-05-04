@@ -242,7 +242,7 @@ func (n *TelegramNotificator) sendMessage(message string, chatId int64) {
 func (n *TelegramNotificator) initChats() {
 
 	n.chats = make([]*Chat, 0)
-	file, readError := ioutil.ReadFile("chats.json")
+	file, readError := ioutil.ReadFile("./config/chat_groups.json")
 	if readError == nil {
 		_ = json.Unmarshal(file, &n.chats)
 	}
@@ -290,5 +290,5 @@ func (n *TelegramNotificator) isChatExist(chatId int64) bool {
 func (n *TelegramNotificator) serializeChats() {
 
 	file, _ := json.MarshalIndent(n.chats, "", " ")
-	_ = ioutil.WriteFile("chat_groups.json", file, 0644)
+	_ = ioutil.WriteFile("./config/chat_groups.json", file, 0644)
 }

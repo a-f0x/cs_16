@@ -39,3 +39,5 @@ services:
       - bot_token=${BOT_TOKEN}
       - bot_reconnect_timeout=${BOT_RECONNECT_TIMEOUT_SEC}
       - admin_password=${ADMIN_PASSWORD}
+    volumes:
+      - ./app/config:/app/config

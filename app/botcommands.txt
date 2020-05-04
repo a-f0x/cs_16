@@ -1,5 +1,5 @@
 info - Show server info
-mute - Disable notifications about connection event
+unmute - Disable notifications about connection event
 mute - Enable notifications about connection event
 maps - Show maps list
 vote_map - <map1> <map2> <map3> <map4>
