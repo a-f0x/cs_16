@@ -1,10 +1,10 @@
 version: '2'
 services:
 
-  cs:
-    container_name: cs
+  cs_classic:
+    container_name: cs_classic
     build:
-      context: ./csserver
+      context: cs_classic
       args:
         RCON_PASSWORD: ${RCON_PASSWORD}
     expose:
@@ -17,17 +17,39 @@ services:
       - log_receiver_ip=bot
       - log_receiver_port=${LOG_RECEIVER_PORT}
       - rcon_password=${RCON_PASSWORD}
-      - cs_ip=cs
-      - cs_port=${HLDS_SERVER_INTERNAL_PORT}
+      - hlds_ip=cs_classic
+      - hlds_port=${HLDS_SERVER_INTERNAL_PORT}
+    volumes:
+      - ./cs_classic/cstrike/addons:/hlds/cstrike/addons
+      - ./cs_classic/cstrike/maps:/hlds/cstrike/maps
+
+  #  hl:
+  #    container_name: hl
+  #    build:
+  #      context: ./halflife
+  #      args:
+  #        RCON_PASSWORD: ${RCON_PASSWORD}
+  #    expose:
+  #      - "${HLDS_SERVER_INTERNAL_PORT}/udp"
+  #      - "${HLDS_SERVER_INTERNAL_PORT}/tcp"
+  #    ports:
+  #      - "${HLDS_SERVER_EXTERNAL_PORT}:${HLDS_SERVER_INTERNAL_PORT}/udp"
+  #      - "${HLDS_SERVER_EXTERNAL_PORT}:${HLDS_SERVER_INTERNAL_PORT}/tcp"
+  #    environment:
+  #      - log_receiver_ip=bot
+  #      - log_receiver_port=${LOG_RECEIVER_PORT}
+  #      - rcon_password=${RCON_PASSWORD}
+  #      - hlds_ip=cs
+  #      - hlds_port=${HLDS_SERVER_INTERNAL_PORT}
 
   bot:
     container_name: bot
     build:
-      context: .
+      context: bot
     expose:
       - "${LOG_RECEIVER_PORT}/udp"
     environment:
-      - hlds_ip=cs
+      - hlds_ip=cs_classic
       - hlds_port=${HLDS_SERVER_INTERNAL_PORT}
       - log_receiver_port=${LOG_RECEIVER_PORT}
       - rcon_password=${RCON_PASSWORD}
@@ -40,4 +62,4 @@ services:
       - bot_reconnect_timeout=${BOT_RECONNECT_TIMEOUT_SEC}
       - admin_password=${ADMIN_PASSWORD}
     volumes:
-      - ./app/config:/app/config
+      - ./bot/config:/bot/config
