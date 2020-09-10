@@ -40,7 +40,7 @@ func fakeEnvs() {
 }
 
 func main() {
-	//fakeEnvs()
+	fakeEnvs()
 	csIp = os.Getenv("hlds_ip")
 	var err error = nil
 
@@ -112,8 +112,6 @@ func initNotificator(config *TelegramConfig) {
 				switch action := event.BotAction; action {
 				case ChatAdded:
 					notificator.Notify("Chat added", event.ChatId)
-				case BotCommand:
-					processBotCommand(&event)
 				case RconCommand:
 					result, err := rcon.SendRconCommand(event.Message)
 					if err != nil {
@@ -130,9 +128,6 @@ func initNotificator(config *TelegramConfig) {
 	go func() {
 		notificator.Start()
 	}()
-}
-
-func processBotCommand(event *BotEvent) {
 }
 
 func initLogReceiver(port int64) {

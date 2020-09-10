@@ -2,52 +2,79 @@ version: '2'
 services:
 
   cs_classic:
+    depends_on:
+      - bot
     container_name: cs_classic
     build:
-      context: cs_classic
+      context: servers/cs_classic
       args:
         RCON_PASSWORD: ${RCON_PASSWORD}
     expose:
       - "${HLDS_SERVER_INTERNAL_PORT}/udp"
       - "${HLDS_SERVER_INTERNAL_PORT}/tcp"
     ports:
-      - "${HLDS_SERVER_EXTERNAL_PORT}:${HLDS_SERVER_INTERNAL_PORT}/udp"
-      - "${HLDS_SERVER_EXTERNAL_PORT}:${HLDS_SERVER_INTERNAL_PORT}/tcp"
+      - "27015:${HLDS_SERVER_INTERNAL_PORT}/udp"
+      - "27015:${HLDS_SERVER_INTERNAL_PORT}/tcp"
     environment:
       - log_receiver_ip=bot
       - log_receiver_port=${LOG_RECEIVER_PORT}
       - rcon_password=${RCON_PASSWORD}
       - hlds_ip=cs_classic
       - hlds_port=${HLDS_SERVER_INTERNAL_PORT}
-    volumes:
-      - ./cs_classic/cstrike/addons:/hlds/cstrike/addons
-      - ./cs_classic/cstrike/maps:/hlds/cstrike/maps
+      - name=Counter-Strike_1.6_Classic
+      - game=cs
+      - discovery_ip=hlds_discovery
+      - discovery_port=${DISCOVERY_SERVICE_PORT}
 
-  #  hl:
-  #    container_name: hl
-  #    build:
-  #      context: ./halflife
-  #      args:
-  #        RCON_PASSWORD: ${RCON_PASSWORD}
-  #    expose:
-  #      - "${HLDS_SERVER_INTERNAL_PORT}/udp"
-  #      - "${HLDS_SERVER_INTERNAL_PORT}/tcp"
-  #    ports:
-  #      - "${HLDS_SERVER_EXTERNAL_PORT}:${HLDS_SERVER_INTERNAL_PORT}/udp"
-  #      - "${HLDS_SERVER_EXTERNAL_PORT}:${HLDS_SERVER_INTERNAL_PORT}/tcp"
-  #    environment:
-  #      - log_receiver_ip=bot
-  #      - log_receiver_port=${LOG_RECEIVER_PORT}
-  #      - rcon_password=${RCON_PASSWORD}
-  #      - hlds_ip=cs
-  #      - hlds_port=${HLDS_SERVER_INTERNAL_PORT}
+
+  #    volumes:
+  #      - ./cs_classic/cstrike/addons:/hlds/cstrike/addons
+  #      - ./cs_classic/cstrike/maps:/hlds/cstrike/maps
+
+
+  hl_classic:
+    depends_on:
+      - bot
+    container_name: hl_classic
+    build:
+      context: servers/hl_classic
+      args:
+        RCON_PASSWORD: ${RCON_PASSWORD}
+    expose:
+      - "${HLDS_SERVER_INTERNAL_PORT}/udp"
+      - "${HLDS_SERVER_INTERNAL_PORT}/tcp"
+    ports:
+      - "27016:${HLDS_SERVER_INTERNAL_PORT}/udp"
+      - "27016:${HLDS_SERVER_INTERNAL_PORT}/tcp"
+    environment:
+      - log_receiver_ip=bot
+      - log_receiver_port=${LOG_RECEIVER_PORT}
+      - rcon_password=${RCON_PASSWORD}
+      - hlds_ip=hl_classic
+      - hlds_port=${HLDS_SERVER_INTERNAL_PORT}
+      - name=Half-Life_Classic
+      - game=hl
+      - discovery_ip=hlds_discovery
+      - discovery_port=${DISCOVERY_SERVICE_PORT}
+
+
+  #    volumes:
+  #      - ./hl_classic/addons:/hl/valve/addons
+  #      - ./hl_classic/maps:/hl/valve/maps
+
+
 
   bot:
+    restart: always
+    depends_on:
+      - hlds_discovery
     container_name: bot
     build:
       context: bot
     expose:
       - "${LOG_RECEIVER_PORT}/udp"
+      - "${DISCOVERY_SERVICE_PORT}/tcp"
+      - "${DISCOVERY_SERVICE_PORT}:${DISCOVERY_SERVICE_PORT}/tcp"
     environment:
       - hlds_ip=cs_classic
       - hlds_port=${HLDS_SERVER_INTERNAL_PORT}
@@ -61,5 +88,7 @@ services:
       - bot_token=${BOT_TOKEN}
       - bot_reconnect_timeout=${BOT_RECONNECT_TIMEOUT_SEC}
       - admin_password=${ADMIN_PASSWORD}
+      - http_port=${DISCOVERY_SERVICE_PORT}
+
     volumes:
       - ./bot/config:/bot/config

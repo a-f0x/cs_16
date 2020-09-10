@@ -64,6 +64,20 @@ type BotAction uint32
 const (
 	ChatAdded   BotAction = 0
 	ChatRemoved BotAction = 1
-	BotCommand  BotAction = 2
 	RconCommand BotAction = 3
 )
+
+type HLDSServer struct {
+	Name            string `json:"name"`
+	Game            string `json:"game"`
+	RconPassword    string `json:"rcon_password"`
+	HLDSIp          string `json:"hlds_ip"`
+	HLDSPort        string `json:"hlds_port"`
+	LogReceiverPort string `json:"log_receiver_port"`
+}
+
+type HLDSServers []HLDSServer
+
+type DiscoveryEvent struct {
+	HLDSServer HLDSServer
+}

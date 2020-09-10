@@ -4,5 +4,11 @@
     "Id": 231341704,
     "Muted": false,
     "AllowExecuteRcon": true
+  },
+  {
+    "Name": "f0x_cs",
+    "Id": -1001454437974,
+    "Muted": false,
+    "AllowExecuteRcon": false
   }
 ]
